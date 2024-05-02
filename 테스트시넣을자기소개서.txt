@@ -1,0 +1,123 @@
+one_magectic.html에 넣을 내용
+프로젝트를 진행하기에 앞서 기술적인 측면에서 REST API와 대용량 데이터 처리를 키워드로 삼아 서울열린 데이터 광장의 부동산 정보를 활용하였습니다 저희 팀은 이러한 정보를 활용해 네이버 지도 API를 통해 사용자에게 시각화된 형태로 제공하기로 했습니다 이를 통해 사용자들이 지도 위에서 부동산 정보
+를 직관적으로 확인하고 탐색할 수 있도록 하였습니다
+여러 분업 중 저는 게시판 제작 업무를 담당해 Django의 장점을 활용하여 데이터베이스 모델을 정의하고 그에 맞는 데이터를 저장하고 관리하는 부분을 담당했습니다 Django의 Model을 활용하여 데이터베이스 구조를 빠르게 설계하고 구현함으로써 시간을 절약하고 이를 기반으로 게시판 화면을 구성하였습니다 또한 로그인 여부에 따른 게시판 화면의 차이나 조회 수 및 추천 수에 따른 정렬 등 다양한 기능을 구현하여 사용자들이 더 효율적으로 부동산 정보를 활용할 수 있도록 만들었습니다
+이 프로젝트를 통해 긍정적인 결과를 얻을 수 있었습니다 성공적으로 마무리하고 제 기술과 아이디어가 현실적으로 적용되는 것을 보며 뿌듯함을 느꼈습니다 또한 팀원들과의 협업을 통해 효과적인 소통과 역할 분담이 프로젝트의 성공에 어떠한 영향을 미치는지를 몸소 체험하게 되었습니다
+팀원들과 원활한 의사소통과 역할 분담은 프로젝트의 진행과 성공에 핵심적인 역할을 한다는 것을 깨닫게 되었습니다 또한 제 기술과 아이디어가 실제로 회사에 기여할 수 있는 가치를 가진다는 확신을 얻게되었습니다 이러한 경험을 토대로 저는 미래에도 협업 능력과 기술적인 역량을 더 키워 귀사에 더욱 큰가치를 제공하고자 합니다
+
+
+적당히 DB관련된 내용답변 대충씀
+Django 에서는 내부 데이터 베이스인  sqlite 를 사용하며 마이그레이션 하며 SQL구문을 이용하지 않고 자체 내부 함수로직으로 구현해야함으로 먼저 db 저장 알고리즘을 구현하고 관련한것을 mysql로 먼저 구현하여 sql 문을 어느정도 완성한뒤 django docs를 보며 함수형으로 바꿔나갔습니다
+게시판 형태의 알고리즘을 주로 설계하고 구현했고 게시글이 삭제되면 게시글의 댓글도 필요 없으니 캐스케이딩으로 삭제하였습니다.
+
+
+Django를 사용하여 데이터베이스 모델을 정의하고 관리하는 경험은 매우 교육적이었으며 몇 가지 중요한 통찰력을 제공했습니다. Django의 ORM (Object-Relational Mapping) 시스템은 데이터베이스 테이블을 파이썬 클래스로 추상화하며, 이를 통해 SQL을 직접 작성하지 않고도 데이터베이스 작업을 수행할 수 있습니다. 이는 개발 속도를 높이고 코드의 가독성을 향상시키는 장점을 가지고 있습니다.
+
+프로젝트 개요
+프로젝트는 커뮤니티 포럼 웹 애플리케이션을 구축하는 것이었습니다. 사용자는 게시글을 작성하고, 다른 사용자의 게시글에 댓글을 달 수 있으며, 게시글에 좋아요를 표시할 수 있습니다.
+
+데이터베이스 모델 설계
+User Model: Django의 내장 AbstractUser 모델을 확장하여 사용자 정의 필드를 추가했습니다.
+Post Model: 사용자가 작성한 게시글을 저장합니다. 각 게시글은 작성자, 제목, 내용, 작성일 등의 정보를 포함합니다.
+Comment Model: 게시글에 대한 댓글을 저장합니다. 각 댓글은 소속된 게시글과 작성자 정보를 가집니다.
+Like Model: 사용자가 게시글에 좋아요를 표시하는 정보를 저장합니다.
+장단점
+장점: Django 모델은 데이터베이스 스키마를 코드로 정의할 수 있게 해주며, migrate 명령어를 통해 이러한 스키마 변경사항을 데이터베이스에 적용할 수 있습니다. 이 접근 방식은 데이터베이스와 애플리케이션 사이의 일관성을 유지하고, 버전 관리 시스템을 통해 변경 사항을 추적하기 쉽게 만듭니다.
+단점: Django의 ORM은 복잡한 쿼리를 작성할 때 제한적일 수 있으며, 최적화된 SQL 쿼리를 작성하는 데 있어서 유연성이 떨어질 수 있습니다.
+구현 과정에서의 어려움과 해결책
+어려움: 초기에는 SQLite를 사용하여 개발을 진행했으나, 프로덕션 환경에서는 MySQL로 전환하는 과정에서 데이터베이스 스펙이 조금씩 달라 문제가 발생했습니다.
+해결책: 데이터베이스 필드 유형과 인덱싱 방법을 조정하고, Django의 데이터베이스 백엔드 설정을 수정하여 두 환경 간의 호환성을 높였습니다.
+데이터 무결성 유지
+게시글이 삭제될 경우, 연관된 댓글과 좋아요도 자동으로 삭제되어야 했습니다. 이를 위해 Django의 on_delete=models.CASCADE 옵션을 사용하여, 관련 데이터가 자동으로 함께 삭제되도록 설정했습니다.
+
+이러한 경험은 Django를 사용하여 복잡한 데이터 관계를 효율적으로 관리하는 방법을 배울 수 있는 좋은 기회였습니다. 또한, 실제 사용 사례에 맞는 데이터베이스 솔루션을 설계하고 구현하는 데 있어 중요한 통찰력을 얻을 수 있었습니다.
+
+
+꼬리질문
+대용량 데이터를 다루는 REST API를 개발할 때, 데이터베이스 쿼리 성능이 전체 응답 시간에 큰 영향을 미칩니다. 특히 복잡한 조인이나 대량 데이터에 대한 쿼리는 성능 저하의 주요 원인이 될 수 있습니다. 이를 해결하기 위해 다음과 같은 최적화를 진행했습니다
+
+인덱스 추가: 쿼리에 자주 사용되는 칼럼에 인덱스를 추가하여 검색 속도를 개선했습니다.
+쿼리 리팩토링: 필요하지 않은 칼럼을 제거하고, 조인 대신 서브쿼리를 사용하는 등 쿼리를 단순화했습니다.
+EXPLAIN PLAN 사용: 쿼리의 실행 계획을 분석하여 비효율적인 부분을 찾아 수정했습니다.
+결과적으로, API의 평균 응답 시간이 50% 이상 개선되었습니다.
+
+
+
+
+
+
+색깔테스트
+
+
+
+
+
+
+
+
+절취선 아래는 프롬프트 연습 볼필요 없
+=====================================
+
+시스템: 당신은 면접관으로서 면접자의 기술적 경험과 프로젝트에 대한 깊은 이해를 돕기 위한 질문을 생성하는 데 도움을 주는 시스템입니다.
+
+면접자의 답변: "제가 최근에 참여한 프로젝트는 대용량 데이터 처리를 위한 데이터베이스 설계였습니다. 우리 팀은 MySQL을 사용하여 데이터베이스를 최적화하였고, 트랜잭션 처리 속도를 개선하기 위해 여러 인덱싱 전략을 적용했습니다."
+
+질문: 면접자의 답변에 기반하여 더 깊은 기술적 통찰을 얻을 수 있는 추가 질문을 생성해주세요.
+
+ const { job_position, type_selected, textarea } = req.body;
+
+    const prompt_content = `
+        You're a hiring manager looking for a new ${job_position} to join your team. Based on the following cover letter, generate 7 interview questions and tips for each question. Please provide your response in JSON format with the following schema:
+        {
+            "questions": [
+                {"question": "...", "tip": "..."},
+                {"question": "...", "tip": "..."}
+            ]
+        }
+
+        Instructions:
+        - Format: Json
+        - Level of Difficulty: Advanced
+        - Number of Questions: 7
+        - Target Audience:ica Applnt
+        - Objective of Questions: To assess the applicant's qualifications and suitability for the role
+        - Note: The 'tip' should guide the applicant on how best to answer the question.
+        - Language Used: Korean
+
+        Resume Information:
+        - cover letter category: ${type_selected === 'personal_statement_form' ? 'Personal Statement' : 'Project'}
+        - cover letter: ${textarea}
+
+        Please respond in Korean.
+    `;
+
+    const messages = [
+        {"role": "system", "content": "You are a helpful interview question generator."},
+        {"role": "user", "content": prompt_content}
+    ];
+
+    try {
+        const response = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: messages,
+            temperature: 0.5
+        });
+        //console.log(response)
+        console.log('AI Response:', response.choices[0].message);
+        //const aiResponse = response.choices[0].message.content;
+        //console.log('test: ', aiResponse); <= 요렇게하면 string으로 인식해서 처음으로 복귀
+        // '''json이 겨있어서 세상 에러났던거 짤라내기
+        const content = response.choices[0].message.content;
+        // JSON 부분만 추출
+        const jsonPart = content.split('```json')[1].split('```')[0].trim();
+        const data = JSON.parse(jsonPart); // JSON 파싱
+
+        res.json({
+            job_position,
+            type_selected,
+            textarea,
+            ai_response:data
+        });
+
+당신은 채용관리자입니다 다음나오는 질문을 듣고 문제에답에대한 취약점을 다시 질문해주세요
+그문제 

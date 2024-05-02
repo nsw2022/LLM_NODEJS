@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Questions</title>
+    <link rel="stylesheet" href="css/tail_questions.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+
+            <a href="#" class="logo">
+                <img src="./images/goliebot.png" alt=""> 꼬질봇
+                <small>똑똑한 꼬리 질문 봇</small>
+            </a>
+            <div class="menu">
+                <a href="#" class="menu-item">서비스 소개</a>
+                <a href="#" class="menu-item">가이드</a>
+            </div>
+            <a href="#" class="menu-item">LOGIN</a>
+        </nav>
+    </header>
+    <aside>
+        <div class="sideChat">
+            <ul class="sideChat-ul">
+                <li class="sideChat-topChild"> + 새로운 면접</li>
+
+                <div style="position: relative;top:20px;margin-top: 90px;" id="introductionContainer">
+                    <!-- <small>4월3일</small>
+                    <li class="sideChat-child">A 회사 지원 동기 및 입사 후 포부</li> -->
+
+                </div>
+
+
+
+            </ul>
+
+            <div class="sideChat-proflie">
+                <img src="./images/usericon.png" alt="유저아이콘">
+                <p>Mr.Kim</p>
+                <img src="./images/gearicon.png" alt="환경설정 창">
+            </div>
+        </div>
+    </aside>
+    <main>
+        <!-- Questions will be dynamically inserted here -->
+    </main>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: '/get_questions',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    if (data && data.questions) {
+                        const questionsHtml = data.questions.map((q, index) => `
+                            <div class="main-cardBox" onclick="window.location.href='/chatbot/${index}'">
+                                <p>${q.question}</p>
+                                <p class="tip"><strong>Tip:</strong> ${q.tip}</p>
+                            </div>
+                        `).join('');
+                        $('main').html(questionsHtml);
+                    } else {
+                        $('main').html('<p>No questions available.</p>');
+                    }
+                },
+                error: function (error) {
+                    $('main').html('<p>Error loading questions.</p>');
+                }
+            });
+
+
+        });
+        $(document).ready(function () {
+            $.ajax({
+                url: '/api/myChatList',
+                type: 'GET',
+                success: function (response) {
+                    if (response.success && response.chatList) {
+                        // 날짜별로 그룹화
+                        const groupedByDate = response.chatList.reduce((acc, chat) => {
+                            const date = new Date(chat.chat_created);
+                            const dateString = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+                            if (!acc[dateString]) {
+                                acc[dateString] = [];
+                            }
+                            acc[dateString].push(chat.summary_chat);
+                            return acc;
+                        }, {});
+
+                        // HTML 문자열 구성
+                        let chatListHtml = '';
+                        for (const [date, chats] of Object.entries(groupedByDate)) {
+                            chatListHtml += `<small>${date}</small>`;
+                            chats.forEach(chat => {
+                                chatListHtml += `<li class='sideChat-child'>${chat}</li>`;
+                            });
+                        }
+
+                        $('#introductionContainer').html(chatListHtml);
+                    } else {
+                        $('#introductionContainer').html('<p>No chats available.</p>');
+                    }
+                },
+                error: function (error) {
+                    $('#introductionContainer').html('<p>Error loading chats.</p>');
+                }
+            });
+        });
+
+    </script>
+
+
+
+
+</body>
+
+</html>
