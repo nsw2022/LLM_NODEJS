@@ -82,7 +82,7 @@
     <aside>
         <div class="sideChat">
             <ul class="sideChat-ul">
-                <li class="sideChat-topChild"> + 새로운 면접</li>
+                <li class="sideChat-topChild" style="cursor: pointer;" onclick="window.location.href='/one_magnetic'"> + 새로운 면접</li>
 
                 <div style="position: relative;top:20px;margin-top: 90px;" id="introductionContainer">
                     <!-- <small>4월3일</small>
@@ -148,10 +148,12 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
+                    console.table(data)
                     if (data.success) {
                         // 데이터가 성공적으로 로드되었을 때
                         $('.main-infochat').html(`
-                    <p>${data.question.questions}</p>
+                        
+                    <p>${data.question.question_text}</p>
                     <p class="tip"><strong>Tip:</strong> ${data.question.question_tip}</p>
                 `);
                     } else {
@@ -177,7 +179,11 @@
                     type: 'POST',
                     contentType: 'application/json',
                     dataType: 'json',
-                    data: JSON.stringify({ question: $('.main-infochat p').text(), answer: userAnswer }),  // 질문 텍스트와 사용자 답변을 JSON으로 변환하여 전송
+                    data: JSON.stringify({ 
+                        question: $('.main-infochat p').text(), 
+                        answer: userAnswer,
+                        questionId: questionId
+                    }),  // 질문 텍스트와 사용자 답변을 JSON으로 변환하여 전송
                     success: function (response) {
                         $('#main-two').hide();
                         $('#main-first').show();
@@ -200,7 +206,7 @@
                         // 날짜별로 그룹화
                         // arr.reduce() 인수로 함수를 받고 (누적계산값, 현재값) => return 계산값
                         const groupedByDate = response.chatList.reduce((acc, chat) => {
-                            const date = new Date(chat.chat_created);
+                            const date = new Date(chat.chat_created_at);
                             const dateString = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
                             if (!acc[dateString]) {
                                 acc[dateString] = [];
@@ -215,7 +221,7 @@
                             chatListHtml += `<small>${date}</small>`;
                             chats.forEach(chat => {
                                 // 여기서 chat.chat_list_id를 활용하여 클릭 이벤트에 사용
-                                chatListHtml += `<li class='sideChat-child' onclick="window.location.href='/dtail_page/${chat.chat_list_id}'">${chat.summary_chat}</li>`;
+                                chatListHtml += `<li class='sideChat-child' onclick="window.location.href='/dtail_page/${chat.chat_id}'">${chat.chat_summary}</li>`;
                             });
                         }
 

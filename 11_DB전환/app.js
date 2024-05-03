@@ -120,7 +120,7 @@ app.get('/api/questions/:id', (req, res) => {
                 res.status(500).json({ success: false, message: "Database connection failed" });
                 return;
             }
-            conn.query('SELECT * FROM question WHERE question_id = ?;', [id], (err, rows) => {
+            conn.query('SELECT * FROM initial_questions WHERE question_id = ?;', [id], (err, rows) => {
                 conn.release();
                 if (err) {
                     console.error('SQL Error:', err);
@@ -138,16 +138,10 @@ app.get('/api/questions/:id', (req, res) => {
 });
 
 
-
-
-
-
-
-// /tail_questions 경로에 대한 post 요청을 처리
 app.get('/tail_questions', (req, res) => {
     
     if (req.session.status === 'ready' && req.session.results) {
-        res.sendFile(path.join(__dirname, 'public/dtail_questions.html'));
+        res.sendFile(path.join(__dirname, 'public/tail_questions.html'));
     } else {
         res.redirect('/staychatbot_processing');
     }

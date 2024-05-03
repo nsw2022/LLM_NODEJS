@@ -39,7 +39,7 @@ router.post("/process/checkuid", (req, res) => {
     }
 
     console.log("데이터베이스 연결됨");
-    const sql = "SELECT COUNT(*) AS count FROM user WHERE user_id = ?";
+    const sql = "SELECT COUNT(*) AS count FROM user WHERE user_login_id = ?";
     conn.query(sql, [uid], (err, results) => {
       conn.release();
       if (err) {
@@ -116,7 +116,7 @@ router.post("/process/adduser", (req, res) => {
 
     console.log("데이터베이스 연결 잘됨");
     const exec = conn.query(
-      "insert into user (user_id, user_name, user_email, user_pass) values (?,?,?, SHA2(?,512) );",
+      "insert into user (user_login_id, user_name, user_email, user_pass) values (?,?,?, SHA2(?,512) );",
       [uid, uname, uemail, upass],
       (err, result) => {
         conn.release();
@@ -153,7 +153,7 @@ router.post("/process/login", (req, res) => {
       res.status(500).send({ success: false, message: "데이터베이스 연결 실패" });
       return;
     }
-    conn.query("SELECT `user_id`, `user_name` FROM `user` WHERE `user_id` = ? AND `user_pass` = SHA2(?, 512)", [uid, upass], (err, rows) => {
+    conn.query("SELECT `user_login_id`, `user_name` FROM `user` WHERE `user_login_id` = ? AND `user_pass` = SHA2(?, 512)", [uid, upass], (err, rows) => {
       conn.release();
       if (err) {
         console.error('SQL 실행 시 오류 발생:', err);
@@ -195,7 +195,7 @@ router.get("/api/myChatList", (req, res) => {
           return;
       }
 
-      const sql = "SELECT summary_chat, chat_created, chat_list_id FROM chat_list WHERE user_id = ? ORDER BY chat_created DESC";
+      const sql = "SELECT chat_summary, chat_created_at, chat_id FROM chat WHERE user_login_id = ? ORDER BY chat_created_at DESC";
       conn.query(sql, [userId], (err, results) => {
           conn.release();
           if (err) {

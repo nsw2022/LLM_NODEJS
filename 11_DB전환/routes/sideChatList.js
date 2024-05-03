@@ -27,7 +27,7 @@ router.get("/tail_page/:chat_list_id", (req, res) => {
       return;
     }
     conn.query(
-      "SELECT * FROM question WHERE chat_list_id = ?;",
+      "SELECT * FROM initial_questions WHERE chat_id = ?;",
       [chat_list_id],
       (err, rows) => {
         conn.release();
@@ -52,7 +52,7 @@ router.get("/api/dtail_other/:question_id", (req, res) => {
     }
 
     conn.query(
-      "SELECT chat_list_id FROM question WHERE question_id = ?;",
+      "SELECT chat_id FROM initial_questions WHERE question_id = ?;",
       [question_id],
       (err, rows) => {
         if (err) {
@@ -63,11 +63,11 @@ router.get("/api/dtail_other/:question_id", (req, res) => {
         }
 
         if (rows.length > 0) {
-          const chat_list_id = rows[0].chat_list_id; // chat_list_id 추출
+          const chat_id = rows[0].chat_id; // chat_list_id 추출
           // 두 번째 쿼리 실행
           conn.query(
-            "SELECT * FROM question WHERE chat_list_id = ?;",
-            [chat_list_id],
+            "SELECT * FROM initial_questions WHERE chat_id = ?;",
+            [chat_id],
             (err, questions) => {
               conn.release(); // 리소스 해제
               if (err) {

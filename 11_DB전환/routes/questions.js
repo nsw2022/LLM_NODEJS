@@ -49,7 +49,7 @@ router.post("/staychatbot", async (req, res) => {
       try {
         // 첫 번째 쿼리: 채팅 리스트에 새로운 항목을 추가
         const chatListInsert = await conn.promise().query(
-          "INSERT INTO chat_list (user_id, introduction, summary_chat) VALUES (?, ?, ?);",
+          "INSERT INTO chat (user_login_id, introduction, chat_summary) VALUES (?, ?, ?);",
           [req.session.user.id, introduction, summary]
         );
         console.log("Inserted 채팅 리스트 성공", chatListInsert[0]);
@@ -60,7 +60,7 @@ router.post("/staychatbot", async (req, res) => {
         if (results.questions) {
           for (const question of results.questions) {
             await conn.promise().query(
-              "INSERT INTO question (chat_list_id, question_code, questions, question_tip) VALUES (?, ?, ?, ?);",
+              "INSERT INTO initial_questions (chat_id, question_code, question_text, question_tip) VALUES (?, ?, ?, ?);",
               [chatListInsert[0].insertId, questionCode, question.question, question.tip]
             );
             //console.log("Inserted 질문 성공");
@@ -216,7 +216,7 @@ router.post("/staychatbot", async (req, res) => {
         Please respond in Korean.
 */
 router.post("/submit-answer", async (req, res) => {
-  const { question, answer } = req.body;
+  const { question, answer, questionId } = req.body;
   console.log("꼬질 질문 이벤트 체크");
   // 질문과 답변을 바탕으로 추가 질문과 팁을 생성하는 프롬프트 구성
   const prompt_content = `
@@ -264,7 +264,7 @@ router.post("/submit-answer", async (req, res) => {
     const data = JSON.parse(content); // JSON 파싱
     console.log("꼬질 전송 체크" + JSON.stringify(data, null, 2));
     res.json({ data });
-
+    
     // DB저장
     pool.getConnection( async (err, conn) =>{
       if (err){
@@ -274,14 +274,15 @@ router.post("/submit-answer", async (req, res) => {
         if (conn) conn.release();
         return;
       }
-
+      console.log('꼬질 이벤트 체크')
       try {
         const gojlieChatInsert = await conn.promise().query(
-          "INSERT INTO question(chat_list_id,question_code,questions,question_tip) VALUES (?,?,?,?);",
-          [req.session.user.id, req.session.results.questions, content.question, content.tip]
+          "INSERT INTO extended_questions(question_id, tail_question, tail_answer, tail_tip) VALUES (?,?,?,?);",
+          [  questionId , data.질문, answer, data.tip]
         )
+        console.log('꼬질 쿼리 이벤트 체크')
       } catch (error) {
-        
+        console.log('꼬질 쿼리 이벤트 에러' + error)
       }
     });
   } catch (error) {
