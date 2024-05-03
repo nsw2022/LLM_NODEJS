@@ -24,13 +24,14 @@
                 <a href="#" class="menu-item">서비스 소개</a>
                 <a href="#" class="menu-item">가이드</a>
             </div>
-            <a href="#" class="menu-item">LOGIN</a>
+            <a href="#" onclick="logoutUser()" class="menu-item">LOGOUT</a>
         </nav>
     </header>
     <aside>
         <div class="sideChat">
             <ul class="sideChat-ul">
-                <li class="sideChat-topChild" style="cursor: pointer;" onclick="window.location.href='/one_magnetic'"> + 새로운 면접</li>
+                <li class="sideChat-topChild" style="cursor: pointer;" onclick="window.location.href='/one_magnetic'"> +
+                    새로운 면접</li>
 
                 <div style="position: relative;top:20px;margin-top: 90px;" id="introductionContainer">
                     <!-- <small>4월3일</small>
@@ -54,6 +55,20 @@
     </main>
     <script>
         $(document).ready(function () {
+
+            function logoutUser() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/logout',
+                    success: function (response) {
+                        alert('로그아웃 되었습니다!')
+                        window.location.href = '/join';
+                    },
+                    error: function () {
+                        alert('로그아웃 실패');
+                    }
+                });
+            }
 
             var chat_list_id = window.location.pathname.split('/').pop();
 
@@ -80,10 +95,10 @@
                     $('main').html('<p>Error loading questions.</p>');
                 }
             });
-            
-            
 
-           
+
+
+
 
             $.ajax({
                 url: '/api/myChatList',

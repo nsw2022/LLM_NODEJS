@@ -24,13 +24,14 @@
                 <a href="#" class="menu-item">서비스 소개</a>
                 <a href="#" class="menu-item">가이드</a>
             </div>
-            <a href="#" class="menu-item">LOGIN</a>
+            <a href="#" onclick="logoutUser()" class="menu-item">LOGOUT</a>
         </nav>
     </header>
     <aside>
         <div class="sideChat">
             <ul class="sideChat-ul">
-                <li class="sideChat-topChild" style="cursor: pointer;" onclick="window.location.href='/one_magnetic'"> + 새로운 면접</li>
+                <li class="sideChat-topChild" style="cursor: pointer;" onclick="window.location.href='/one_magnetic'"> +
+                    새로운 면접</li>
 
                 <div style="position: relative;top:20px;margin-top: 90px;" id="introductionContainer">
                     <!-- <small>4월3일</small>
@@ -54,45 +55,60 @@
     </main>
     <script>
         $(document).ready(function () {
+
+            function logoutUser() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/logout',
+                    success: function (response) {
+                        alert('로그아웃 되었습니다!')
+                        window.location.href = '/join';
+                    },
+                    error: function () {
+                        alert('로그아웃 실패');
+                    }
+                });
+            }
+
             const chatListId = window.location.pathname.split('/')[2]
             // 채팅방 목록을 불러오는 AJAX 요청
             function loadChatList() {
                 $.ajax({
-                url: '/api/myChatList',
-                type: 'GET',
-                success: function (response) {
-                    if (response.success && response.chatList) {
-                        // 날짜별로 그룹화
-                        // arr.reduce() 인수로 함수를 받고 (누적계산값, 현재값) => return 계산값
-                        const groupedByDate = response.chatList.reduce((acc, chat) => {
-                            const date = new Date(chat.chat_created_at);
-                            const dateString = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
-                            if (!acc[dateString]) {
-                                acc[dateString] = [];
+                    url: '/api/myChatList',
+                    type: 'GET',
+                    success: function (response) {
+                        if (response.success && response.chatList) {
+                            // 날짜별로 그룹화
+                            // arr.reduce() 인수로 함수를 받고 (누적계산값, 현재값) => return 계산값
+                            const groupedByDate = response.chatList.reduce((acc, chat) => {
+                                const date = new Date(chat.chat_created_at);
+                                const dateString = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+                                if (!acc[dateString]) {
+                                    acc[dateString] = [];
+                                }
+                                acc[dateString].push(chat);  // 여기서는 chat 객체 전체를 배열에 추가
+                                return acc;
+                            }, {});
+
+                            // HTML 문자열 구성
+                            let chatListHtml = '';
+                            for (const [date, chats] of Object.entries(groupedByDate)) {
+                                chatListHtml += `<small>${date}</small>`;
+                                chats.forEach(chat => {
+                                    // 여기서 chat.chat_list_id를 활용하여 클릭 이벤트에 사용
+                                    chatListHtml += `<li class='sideChat-child' onclick="window.location.href='/dtail_page/${chat.chat_id}'">${chat.chat_summary}</li>`;
+                                });
                             }
-                            acc[dateString].push(chat);  // 여기서는 chat 객체 전체를 배열에 추가
-                            return acc;
-                        }, {});
 
-                        // HTML 문자열 구성
-                        let chatListHtml = '';
-                        for (const [date, chats] of Object.entries(groupedByDate)) {
-                            chatListHtml += `<small>${date}</small>`;
-                            chats.forEach(chat => {
-                                // 여기서 chat.chat_list_id를 활용하여 클릭 이벤트에 사용
-                                chatListHtml += `<li class='sideChat-child' onclick="window.location.href='/dtail_page/${chat.chat_id}'">${chat.chat_summary}</li>`;
-                            });
+                            $('#introductionContainer').html(chatListHtml);
+                        } else {
+                            $('#introductionContainer').html('<p>No chats available.</p>');
                         }
-
-                        $('#introductionContainer').html(chatListHtml);
-                    } else {
-                        $('#introductionContainer').html('<p>No chats available.</p>');
+                    },
+                    error: function (error) {
+                        $('#introductionContainer').html('<p>Error loading chats.</p>');
                     }
-                },
-                error: function (error) {
-                    $('#introductionContainer').html('<p>Error loading chats.</p>');
-                }
-            });
+                });
             }
 
             // 질문 목록을 불러오는 AJAX 요청
@@ -104,7 +120,7 @@
                         console.log(data)
                         if (data && data.questions) {
                             const questionsHtml = data.questions.map((q, index) =>
-                                    
+
                                 `<div class="main-cardBox" onclick="window.location.href='/chatbot/${index}'"><p>${q.question}</p><p class="tip"><strong>Tip:</strong> ${q.tip}</p></div>`
                             ).join('');
                             $('main').html(questionsHtml);
@@ -125,8 +141,8 @@
                     success: function (response) {
                         if (response.success && response.tail_list.length > 0) {
                             const questionsHtml = response.tail_list.map(question =>
-                            console.tail_list(question)
-                                `<div class="main-cardBox">
+                                console.tail_list(question)
+                                    `<div class="main-cardBox">
               <p>${question.question_text}</p>
               <p><strong>Tip:</strong> ${question.question_tip}</p>
             </div>`

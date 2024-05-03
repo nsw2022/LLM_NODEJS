@@ -76,13 +76,14 @@
                 <a href="#" class="menu-item">서비스 소개</a>
                 <a href="#" class="menu-item">가이드</a>
             </div>
-            <a href="#" class="menu-item">LOGIN</a>
+            <a href="#" onclick="logoutUser()" class="menu-item">LOGOUT</a>
         </nav>
     </header>
     <aside>
         <div class="sideChat">
             <ul class="sideChat-ul">
-                <li class="sideChat-topChild" style="cursor: pointer;" onclick="window.location.href='/one_magnetic'"> + 새로운 면접</li>
+                <li class="sideChat-topChild" style="cursor: pointer;" onclick="window.location.href='/one_magnetic'"> +
+                    새로운 면접</li>
 
                 <div style="position: relative;top:20px;margin-top: 90px;" id="introductionContainer">
                     <!-- <small>4월3일</small>
@@ -139,6 +140,21 @@
 
     <script>
         $(document).ready(function () {
+
+            function logoutUser() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/logout',
+                    success: function (response) {
+                        alert('로그아웃 되었습니다!')
+                        window.location.href = '/join';
+                    },
+                    error: function () {
+                        alert('로그아웃 실패');
+                    }
+                });
+            }
+
             // URL에서 마지막 부분을 질문 ID로 추출
             var questionId = window.location.pathname.split('/').pop();
 
@@ -179,8 +195,8 @@
                     type: 'POST',
                     contentType: 'application/json',
                     dataType: 'json',
-                    data: JSON.stringify({ 
-                        question: $('.main-infochat p').text(), 
+                    data: JSON.stringify({
+                        question: $('.main-infochat p').text(),
                         answer: userAnswer,
                         questionId: questionId
                     }),  // 질문 텍스트와 사용자 답변을 JSON으로 변환하여 전송
@@ -196,7 +212,7 @@
                     }
                 });
             });
-            
+
             // 사이드 챗봇
             $.ajax({
                 url: '/api/myChatList',
@@ -241,7 +257,7 @@
             var currentId = pathParts.pop();             // URL의 마지막 부분 (ID)를 추출
 
             // '#nextKeyword'에 클릭 이벤트 핸들러를 바인딩
-            $('#nextKeyword').click(function() {
+            $('#nextKeyword').click(function () {
                 window.location.href = `/dtail_other/${currentId}`;  // 새로운 URL로 이동
             });
 

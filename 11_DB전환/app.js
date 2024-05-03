@@ -50,6 +50,20 @@ app.get('/join', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/join.html'));
 });
 
+// 세션 없을시 로그인페이지로 돌림
+function checkSession(req, res, next) {
+    if (!req.session.user || !req.session.user.id) {
+        // 클라이언트에 JavaScript를 전송하여 alert를 보여주고 로그인 페이지로 리다이렉트
+        res.send(`
+            <script>
+                alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+                window.location.href = "/join";
+            </script>
+        `);
+    } else {
+        next();
+    }
+}
 
 
 
@@ -79,7 +93,7 @@ app.get('/join', (req, res) => {
 // });
 
 // 챗봇 화면
-app.get('/chatbot/:id', (req, res) => {
+app.get('/chatbot/:id', checkSession,(req, res) => {
     // ID 파싱
     const { id } = req.params;
 
@@ -87,13 +101,13 @@ app.get('/chatbot/:id', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/chatbot.html'));
 });
 
-app.get('/dtail_page/:chat_list_id', (req, res)=>{
+app.get('/dtail_page/:chat_list_id',checkSession, (req, res)=>{
     const {chat_list_id} = req.params;
 
     res.sendFile(path.join(__dirname, 'public/dtail_questions.html'))
 })
 
-app.get("/dtail_other/:question_id", (req, res) => {
+app.get("/dtail_other/:question_id", checkSession,(req, res) => {
     const {question_id} = req.params;
     res.sendFile(path.join(__dirname, 'public/dtail_other.html'))
 });
@@ -101,7 +115,7 @@ app.get("/dtail_other/:question_id", (req, res) => {
 
 
 // 꼬리질문 형태
-app.get('/api/questions/:id', (req, res) => {
+app.get('/api/questions/:id', checkSession,(req, res) => {
     const { id } = req.params;
     if (req.session.results && req.session.results.questions) {
         const questions = req.session.results.questions;
@@ -138,7 +152,7 @@ app.get('/api/questions/:id', (req, res) => {
 });
 
 
-app.get('/tail_questions', (req, res) => {
+app.get('/tail_questions', checkSession,(req, res) => {
     
     if (req.session.status === 'ready' && req.session.results) {
         res.sendFile(path.join(__dirname, 'public/tail_questions.html'));
@@ -157,7 +171,7 @@ app.get('/tail_questions', (req, res) => {
 // });
 
 // 결과 상태 확인
-app.get('/check_results', (req, res) => {
+app.get('/check_results', checkSession,(req, res) => {
     if (req.session.status === 'ready' || req.session.results) {
         res.json({ status: 'ready', data: req.session.results });
     } else if (req.session.status === 'error') {
@@ -172,7 +186,7 @@ app.get('/check_results', (req, res) => {
 
 
 // 애니메이션 페이지를 보여줄 창
-app.get('/staychatbot_processing', (req, res) => {
+app.get('/staychatbot_processing', checkSession,(req, res) => {
     res.sendFile(path.join(__dirname, 'public/staychatbot.html'));
 });
 
@@ -180,7 +194,7 @@ app.get('/staychatbot_processing', (req, res) => {
 
 
 // /one_magnetic 경로에 대한 get 요청을 처리
-app.get('/one_magnetic', (req, res) => {
+app.get('/one_magnetic', checkSession,(req, res) => {
  
     res.sendFile(path.join(__dirname, 'public/one_magnetic.html'));
 });
@@ -188,14 +202,24 @@ app.get('/one_magnetic', (req, res) => {
 
 // 로그아웃
 app.post('/logout', (req, res) => {
+    // 세션 파괴
     req.session.destroy(err => {
         if (err) {
-            return res.status(500).send({ message: '로그아웃 실패.' });
+            // 세션 파괴 중 에러 발생 시 500 상태 코드로 응답
+            console.error("로그아웃 중 에러 발생:", err);
+            return res.status(500).send({ message: '로그아웃 실패, 서버 에러.' });
         }
         
-        res.send({ redirectTo: '/join' });
+        // 세션 파괴 후 클라이언트에 JavaScript를 전송하여 로그인 페이지로 리다이렉트
+        res.send(`
+            <script>
+                alert("로그아웃 되었습니다.");
+                window.location.href = "/join";
+            </script>
+        `);
     });
 });
+
 
 
 
